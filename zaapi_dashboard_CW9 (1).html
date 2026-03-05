@@ -1,0 +1,2245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Zaapi · CW9</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#0a0c10;--sur:#111318;--sur2:#171a22;--bdr:#252a38;--bdr2:#2f3549;
+  --acc:#7c6af7;--grn:#34d399;--red:#f87171;--amb:#fbbf24;--blu:#60a5fa;--pnk:#f472b6;--tel:#2dd4bf;
+  --th:#7c6af7;--sea:#2dd4bf;--row:#fbbf24;--gl:#60a5fa;
+  --t1:#e8eaf0;--t2:#9aa0b4;--t3:#555e78;
+  --mono:'DM Mono',monospace;--head:'Syne',sans-serif;--body:'DM Sans',sans-serif;--r:10px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--t1);font-family:var(--body);font-size:13px;line-height:1.5;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(124,106,247,.025)1px,transparent 1px),linear-gradient(90deg,rgba(124,106,247,.025)1px,transparent 1px);
+  background-size:40px 40px}
+.topbar{position:sticky;top:0;z-index:100;background:rgba(10,12,16,.93);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--bdr);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:var(--head);font-size:17px;font-weight:800;letter-spacing:-.5px;color:var(--acc)}
+.logo span{color:var(--t3);font-weight:600}
+.ctrlbar{padding:9px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  background:var(--sur);border-bottom:1px solid var(--bdr);position:sticky;top:52px;z-index:90}
+.cg{display:flex;gap:2px;background:var(--bg);border:1px solid var(--bdr);border-radius:8px;overflow:hidden}
+.cb{padding:5px 14px;background:transparent;border:none;cursor:pointer;color:var(--t2);
+  font-family:var(--body);font-size:12px;font-weight:500;transition:all .15s;white-space:nowrap}
+.cb:hover{color:var(--t1);background:var(--sur2)}
+.cb.on{background:var(--acc);color:#fff;font-weight:600}
+.clbl{font-size:10px;color:var(--t3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px}
+.badge{font-family:var(--mono);font-size:10px;color:var(--grn);border:1px solid rgba(52,211,153,.3);background:rgba(52,211,153,.08);border-radius:20px;padding:3px 10px}
+.main{padding:16px 24px;position:relative;z-index:1}
+.sbar{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:7px;margin-bottom:14px}
+.sig{display:flex;gap:9px;background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);
+  padding:9px 13px;border-left:3px solid transparent}
+.sig.up{border-left-color:var(--grn)}.sig.dn{border-left-color:var(--red)}
+.sig.wn{border-left-color:var(--amb)}.sig.nfo{border-left-color:var(--blu)}
+.sico{font-size:13px;line-height:1;margin-top:1px;flex-shrink:0}
+.stag{font-size:9px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;font-family:var(--mono);margin-bottom:2px}
+.sig.up .stag{color:var(--grn)}.sig.dn .stag{color:var(--red)}.sig.wn .stag{color:var(--amb)}.sig.nfo .stag{color:var(--blu)}
+.stxt{font-size:11px;color:var(--t1);line-height:1.4}
+.krow{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:7px;margin-bottom:14px}
+.kpi{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:12px 14px;position:relative;overflow:hidden}
+.kpi::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--ka,transparent)}
+.klbl{font-size:9px;color:var(--t3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+.kval{font-size:21px;font-weight:700;font-family:var(--head);letter-spacing:-.5px}
+.kd{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-family:var(--mono);font-weight:500;margin-top:4px;margin-bottom:4px}
+.kd.up{color:var(--grn)}.kd.dn{color:var(--red)}.kd.fl{color:var(--t3)}
+.chips{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px}
+.chip{font-size:9.5px;font-family:var(--mono);padding:2px 6px;border-radius:4px;font-weight:500}
+.cth{background:rgba(124,106,247,.15);color:var(--th)}.csea{background:rgba(45,212,191,.15);color:var(--sea)}
+.crow{background:rgba(251,191,36,.15);color:var(--row)}.cgl{background:rgba(96,165,250,.15);color:var(--gl)}
+.tpct{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-family:var(--mono);
+  padding:2px 6px;border-radius:4px;font-weight:600;margin-top:2px}
+.tpct.ok{background:rgba(52,211,153,.1);color:var(--grn)}.tpct.wn{background:rgba(251,191,36,.1);color:var(--amb)}
+.tpct.bd{background:rgba(248,113,113,.1);color:var(--red)}
+.prnote{font-size:8px;color:var(--t3);font-family:var(--mono);margin-top:1px;display:block}
+.grid{display:grid;gap:11px;margin-bottom:11px}
+.g2{grid-template-columns:1fr 1fr}.g21{grid-template-columns:2fr 1fr}
+.card{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--r);padding:14px}
+.ctit{font-size:12px;font-weight:600;color:var(--t1);font-family:var(--head);margin-bottom:3px}
+.csub{font-size:10px;color:var(--t3);font-family:var(--mono);margin-bottom:8px}
+.leg{display:flex;gap:11px;margin-bottom:7px;flex-wrap:wrap}
+.li{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--t2);font-family:var(--mono)}
+.ld{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.cbox{position:relative}
+.h150{height:150px}.h170{height:170px}.h190{height:190px}.h210{height:210px}
+.sec{display:flex;align-items:center;gap:10px;margin:14px 0 9px}
+.slbl{font-family:var(--mono);font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.8px;color:var(--t3);white-space:nowrap}
+.sln{flex:1;height:1px;background:var(--bdr)}
+.ctab{width:100%;border-collapse:collapse}
+.ctab th{font-size:9px;color:var(--t3);font-family:var(--mono);text-transform:uppercase;letter-spacing:.5px;
+  padding:0 7px 7px;text-align:left;border-bottom:1px solid var(--bdr)}
+.ctab th:not(:first-child){text-align:right}
+.ctab td{padding:7px;font-size:11.5px;border-bottom:1px solid rgba(37,42,56,.4);vertical-align:middle}
+.ctab td:not(:first-child){text-align:right;font-family:var(--mono)}
+.ctab tr:last-child td{border-bottom:none}
+.ctab tr:hover td{background:rgba(255,255,255,.012)}
+.cname{display:flex;align-items:center;gap:7px;font-weight:600}
+.cdot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.dtag{font-size:9px;font-family:var(--mono);font-weight:600}
+.dtag.up{color:var(--grn)}.dtag.dn{color:var(--red)}.dtag.fl{color:var(--t3)}
+.rstack{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.ri{display:flex;flex-direction:column;background:var(--sur2);border-radius:6px;padding:6px 9px;flex:1;min-width:65px}
+.rilbl{font-size:8px;font-family:var(--mono);color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.rival{font-size:13px;font-weight:600;font-family:var(--head)}
+@media(max-width:900px){.g2,.g21{grid-template-columns:1fr}.krow{grid-template-columns:1fr 1fr}}
+@media(max-width:500px){.krow{grid-template-columns:1fr}.topbar,.main{padding-left:14px;padding-right:14px}}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:3px}
+@keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.fi{animation:fu .22s ease both}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:18px">
+    <div class="logo">zaapi <span>/ commercial</span></div>
+    <span style="font-size:11px;color:var(--t3);font-family:var(--mono);letter-spacing:.5px;text-transform:uppercase" id="pagetitle">CW9 · Commercial Overview</span>
+  </div>
+  <span class="badge" id="dbadge">● Loading…</span>
+</div>
+<div class="ctrlbar">
+  <div style="display:flex;align-items:center;gap:6px">
+    <span class="clbl">View</span>
+    <div class="cg"><button class="cb on" id="bw" onclick="setView('W')">Weekly</button><button class="cb" id="bm" onclick="setView('M')">Monthly</button></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:6px">
+    <span class="clbl">Country</span>
+    <div class="cg" id="cbg">
+      <button class="cb on" onclick="setC('Global')">Global</button>
+      <button class="cb" onclick="setC('TH')">TH</button>
+      <button class="cb" onclick="setC('SEA')">SEA</button>
+      <button class="cb" onclick="setC('ROW')">ROW</button>
+    </div>
+  </div>
+</div>
+<div class="main" id="app"></div>
+
+<script>
+// DATA — extracted from Ultra_New_Zaapi_Master_sheet_v4.xlsx
+// Anchor = last week where Global ad spend > 0 = 2026-03-01 (CW9)
+// Weekly = 12 weeks; Monthly = 12 months (Apr'25–Mar'26)
+// Numbers shown exactly as in sheet.
+const RAW = {
+  "anchor_date": "2026-03-01",
+  "anchor_cw": 9,
+  "prorate_factor": 0.2258,
+  "wow": {
+    "dates": [
+      "2025-12-14",
+      "2025-12-21",
+      "2025-12-28",
+      "2026-01-04",
+      "2026-01-11",
+      "2026-01-18",
+      "2026-01-25",
+      "2026-02-01",
+      "2026-02-08",
+      "2026-02-15",
+      "2026-02-22",
+      "2026-03-01"
+    ],
+    "cw": [
+      50,
+      51,
+      52,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "signups": {
+      "Global": [
+        142.0,
+        132.0,
+        98.0,
+        106.0,
+        166.0,
+        150.0,
+        157.0,
+        153.0,
+        159.0,
+        152.0,
+        155.0,
+        148.0
+      ],
+      "TH": [
+        107.0,
+        87.0,
+        76.0,
+        70.0,
+        130.0,
+        110.0,
+        101.0,
+        96.0,
+        123.0,
+        109.0,
+        113.0,
+        111.0
+      ],
+      "SEA": [
+        30.0,
+        38.0,
+        21.0,
+        32.0,
+        33.0,
+        36.0,
+        47.0,
+        43.0,
+        28.0,
+        37.0,
+        34.0,
+        26.0
+      ],
+      "ROW": [
+        5.0,
+        7.0,
+        1.0,
+        4.0,
+        3.0,
+        4.0,
+        9.0,
+        14.0,
+        8.0,
+        6.0,
+        8.0,
+        11.0
+      ]
+    },
+    "hqplus": {
+      "Global": [
+        26.0,
+        22.0,
+        12.0,
+        10.0,
+        26.0,
+        21.0,
+        23.0,
+        22.0,
+        21.0,
+        15.0,
+        23.0,
+        19.0
+      ],
+      "TH": [
+        23.0,
+        20.0,
+        11.0,
+        8.0,
+        23.0,
+        20.0,
+        20.0,
+        16.0,
+        17.0,
+        14.0,
+        21.0,
+        18.0
+      ],
+      "SEA": [
+        3.0,
+        2.0,
+        1.0,
+        2.0,
+        3.0,
+        1.0,
+        3.0,
+        6.0,
+        4.0,
+        1.0,
+        2.0,
+        1.0
+      ],
+      "ROW": [
+        null,
+        null,
+        null,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "subs": {
+      "Global": [
+        6.0,
+        9.0,
+        7.0,
+        4.0,
+        13.0,
+        11.0,
+        15.0,
+        15.0,
+        13.0,
+        11.0,
+        22.0,
+        12.0
+      ],
+      "TH": [
+        6.0,
+        6.0,
+        6.0,
+        3.0,
+        11.0,
+        9.0,
+        10.0,
+        12.0,
+        12.0,
+        7.0,
+        18.0,
+        10.0
+      ],
+      "SEA": [
+        0.0,
+        3.0,
+        1.0,
+        1.0,
+        2.0,
+        1.0,
+        4.0,
+        3.0,
+        1.0,
+        4.0,
+        4.0,
+        2.0
+      ],
+      "ROW": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "subs_target_monthly": {
+      "Global": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "TH": [
+        0.03,
+        0.03,
+        0.03,
+        0.03,
+        0.03,
+        0.03,
+        0.03,
+        0.03,
+        0.03,
+        0.03,
+        0.03,
+        0.03
+      ],
+      "SEA": null,
+      "ROW": null
+    },
+    "adspend": {
+      "Global": [
+        6196.7,
+        6798.81,
+        3954.24,
+        5272.96,
+        8040.47,
+        10029.27,
+        6394.17,
+        8762.17,
+        8684.31,
+        8453.54,
+        6696.32,
+        6268.77
+      ],
+      "TH": [
+        4338.18,
+        4792.78,
+        2687.28,
+        3647.27,
+        5882.8,
+        7005.14,
+        3519.54,
+        5337.74,
+        5834.75,
+        4692.89,
+        4136.61,
+        4939.37
+      ],
+      "SEA": [
+        1858.52,
+        2006.03,
+        1266.96,
+        1625.69,
+        2157.67,
+        3024.13,
+        2874.63,
+        3424.43,
+        2849.56,
+        3760.65,
+        2397.59,
+        1269.18
+      ],
+      "ROW": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        162.12,
+        60.22
+      ]
+    },
+    "blended_cac": {
+      "Global": [
+        1032.78,
+        755.42,
+        564.89,
+        1318.24,
+        618.5,
+        911.75,
+        426.28,
+        584.14,
+        668.02,
+        768.5,
+        304.38,
+        522.4
+      ],
+      "TH": [
+        723.03,
+        798.8,
+        447.88,
+        1215.76,
+        534.8,
+        778.35,
+        351.95,
+        444.81,
+        486.23,
+        670.41,
+        229.81,
+        493.94
+      ],
+      "SEA": [
+        0.0,
+        668.68,
+        1266.96,
+        1625.69,
+        1078.83,
+        3024.13,
+        718.66,
+        1141.48,
+        2849.56,
+        940.16,
+        599.4,
+        634.59
+      ]
+    },
+    "revenue": {
+      "Global_Total": [
+        10701.1,
+        23378.38,
+        16536.35,
+        8739.83,
+        19691.36,
+        14331.77,
+        23092.92,
+        41854.28,
+        21184.35,
+        19371.91,
+        27964.84,
+        18668.15
+      ],
+      "Global_Target": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "Global_New": [
+        3942.02,
+        8705.27,
+        5646.21,
+        2296.81,
+        11910.34,
+        4246.5,
+        12764.69,
+        12527.39,
+        8464.6,
+        5511.47,
+        9945.37,
+        3909.44
+      ],
+      "Global_Renewal": [
+        6462.82,
+        13536.38,
+        9732.21,
+        6133.15,
+        6485.75,
+        8191.37,
+        7655.64,
+        25971.78,
+        11016.95,
+        12814.03,
+        16184.23,
+        13857.32
+      ],
+      "Global_Upgrade": [
+        296.26,
+        1136.74,
+        1157.93,
+        309.87,
+        1295.28,
+        1893.9,
+        2672.59,
+        3355.11,
+        1702.8,
+        1046.41,
+        1835.25,
+        901.39
+      ],
+      "TH_Total": [
+        10183.05,
+        18420.38,
+        14794.66,
+        6185.97,
+        18515.11,
+        12379.56,
+        16886.0,
+        28007.08,
+        17420.3,
+        16693.96,
+        24276.61,
+        17326.69
+      ],
+      "TH_New": [
+        3942.02,
+        5214.6,
+        5505.0,
+        2015.54,
+        11421.13,
+        4123.84,
+        7422.94,
+        10023.95,
+        7328.6,
+        4174.44,
+        8899.66,
+        3721.44
+      ],
+      "TH_Renewal": [
+        6001.17,
+        12711.94,
+        8205.84,
+        4139.59,
+        6294.27,
+        7013.13,
+        7012.96,
+        17666.94,
+        8912.43,
+        12011.03,
+        14021.24,
+        13013.32
+      ],
+      "TH_Upgrade": [
+        239.86,
+        493.83,
+        1083.81,
+        30.85,
+        799.71,
+        1242.58,
+        2450.1,
+        316.18,
+        1179.27,
+        508.49,
+        1355.71,
+        591.93
+      ],
+      "SEA_Total": [
+        381.5,
+        4958.01,
+        1741.7,
+        2553.85,
+        1176.25,
+        1814.75,
+        5923.95,
+        13847.2,
+        3747.09,
+        2662.77,
+        3221.24,
+        1341.46
+      ],
+      "SEA_New": [
+        0.0,
+        3490.67,
+        141.21,
+        281.27,
+        489.2,
+        61.32,
+        5058.77,
+        2503.44,
+        1136.0,
+        1337.03,
+        1045.71,
+        188.0
+      ],
+      "SEA_Renewal": [
+        340.43,
+        824.43,
+        1526.37,
+        1993.56,
+        191.48,
+        1117.09,
+        642.68,
+        8304.84,
+        2104.52,
+        803.01,
+        1695.99,
+        844.0
+      ],
+      "SEA_Upgrade": [
+        41.07,
+        642.9,
+        74.11,
+        279.02,
+        495.56,
+        636.34,
+        222.49,
+        3038.93,
+        506.57,
+        522.74,
+        479.54,
+        309.46
+      ],
+      "ROW_Total": [
+        136.55,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        137.47,
+        282.98,
+        0.0,
+        0.0,
+        15.18,
+        467.0,
+        0.0
+      ],
+      "ROW_New": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        61.34,
+        282.98,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "mom": {
+    "months": [
+      "Apr'25",
+      "May'25",
+      "Jun'25",
+      "Jul'25",
+      "Aug'25",
+      "Sep'25",
+      "Oct'25",
+      "Nov'25",
+      "Dec'25",
+      "Jan'26",
+      "Feb'26",
+      "Mar'26"
+    ],
+    "hqplus": {
+      "Global": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        76.0,
+        132.0,
+        84.0,
+        80.0,
+        81.0
+      ],
+      "TH": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        118.0,
+        77.0,
+        71.0,
+        68.0,
+        19.0,
+        0.0
+      ],
+      "SEA": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        14.0,
+        7.0,
+        9.0,
+        13.0,
+        2.0,
+        0.0
+      ],
+      "ROW": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    },
+    "signups": {
+      "Global": [
+        1184.0,
+        1739.0,
+        1329.0,
+        1658.0,
+        1960.0,
+        669.0,
+        807.0,
+        504.0,
+        579.0,
+        619.0,
+        186.0,
+        0.0
+      ],
+      "TH": [
+        843.0,
+        1621.0,
+        1192.0,
+        1295.0,
+        472.0,
+        464.0,
+        537.0,
+        369.0,
+        411.0,
+        441.0,
+        136.0,
+        0.0
+      ],
+      "SEA": [
+        329.0,
+        93.0,
+        107.0,
+        324.0,
+        1434.0,
+        174.0,
+        237.0,
+        118.0,
+        148.0,
+        142.0,
+        36.0,
+        0.0
+      ],
+      "ROW": [
+        12.0,
+        25.0,
+        30.0,
+        39.0,
+        54.0,
+        31.0,
+        33.0,
+        17.0,
+        20.0,
+        36.0,
+        14.0,
+        0.0
+      ]
+    },
+    "signups_target": {
+      "Global": [
+        340.0,
+        400.0,
+        320.0,
+        400.0,
+        320.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        280.0
+      ],
+      "TH": [
+        200.0,
+        250.0,
+        200.0,
+        250.0,
+        200.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        200.0
+      ]
+    },
+    "subs": {
+      "Global": [
+        22.0,
+        26.0,
+        47.0,
+        36.0,
+        36.0,
+        33.0,
+        34.0,
+        47.0,
+        29.0,
+        43.0,
+        61.0,
+        23.0
+      ],
+      "TH": [
+        19.0,
+        25.0,
+        43.0,
+        32.0,
+        28.0,
+        29.0,
+        25.0,
+        35.0,
+        24.0,
+        33.0,
+        49.0,
+        21.0
+      ],
+      "SEA": [
+        3.0,
+        1.0,
+        4.0,
+        4.0,
+        8.0,
+        4.0,
+        8.0,
+        11.0,
+        5.0,
+        8.0,
+        12.0,
+        2.0
+      ]
+    },
+    "subs_target": {
+      "Global": [
+        null,
+        null,
+        null,
+        38.0,
+        39.0,
+        42.0,
+        53.87,
+        56.67,
+        57.14,
+        46.36,
+        55.47,
+        68.75
+      ],
+      "SEA": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        6.25,
+        6.67,
+        7.14,
+        10.0,
+        11.11,
+        18.75
+      ],
+      "TH": null,
+      "ROW": null
+    },
+    "adspend": {
+      "Global": [
+        7649.47,
+        12028.29,
+        14992.53,
+        15133.37,
+        22217.44,
+        23713.63,
+        27822.72,
+        30431.44,
+        22674.19,
+        29736.87,
+        32596.35,
+        6268.77
+      ],
+      "TH": [
+        6583.63,
+        8621.7,
+        11255.54,
+        10770.8,
+        14581.44,
+        14616.61,
+        17806.54,
+        18876.12,
+        15793.65,
+        20054.75,
+        20001.99,
+        4939.37
+      ],
+      "SEA": [
+        1065.85,
+        3406.59,
+        3736.99,
+        4362.56,
+        7636.0,
+        9097.03,
+        10016.18,
+        11555.32,
+        6880.54,
+        9682.12,
+        12432.23,
+        1269.18
+      ],
+      "ROW": [
+        null,
+        null,
+        null,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        162.12,
+        60.22
+      ]
+    },
+    "adspend_target": {
+      "Global": [
+        10000.0,
+        12000.0,
+        14000.0,
+        17000.0,
+        20000.0,
+        23000.0,
+        25000.0,
+        28000.0,
+        27000.0,
+        35000.0,
+        40000.0,
+        45000.0
+      ],
+      "TH": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        20000.0,
+        20000.0,
+        20000.0,
+        20000.0,
+        20000.0,
+        25000.0
+      ],
+      "SEA": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        5000.0,
+        5000.0,
+        5000.0,
+        10000.0,
+        10000.0,
+        15000.0
+      ]
+    },
+    "blended_cac": {
+      "Global": [
+        347.7,
+        462.63,
+        318.99,
+        420.37,
+        617.15,
+        718.59,
+        818.32,
+        647.48,
+        781.87,
+        691.56,
+        534.37,
+        272.56
+      ],
+      "TH": [
+        346.51,
+        344.87,
+        261.76,
+        336.59,
+        520.77,
+        504.02,
+        712.26,
+        539.32,
+        658.07,
+        607.72,
+        408.2,
+        235.21
+      ]
+    },
+    "cac_target": {
+      "Global": [
+        null,
+        null,
+        null,
+        447.37,
+        512.82,
+        547.62,
+        464.09,
+        494.12,
+        472.5,
+        754.9,
+        721.05,
+        654.55
+      ]
+    },
+    "roas": {
+      "Global": [
+        0.92,
+        1.05,
+        1.78,
+        1.41,
+        1.21,
+        1.06,
+        0.76,
+        0.76,
+        0.99,
+        0.89,
+        0.94,
+        1.92
+      ],
+      "TH": [
+        0.92,
+        1.44,
+        2.31,
+        1.94,
+        1.73,
+        1.58,
+        0.98,
+        0.99,
+        1.2,
+        1.05,
+        1.24,
+        2.4
+      ]
+    },
+    "revenue": {
+      "Global_Total": [
+        17799.17,
+        29786.7,
+        49435.53,
+        51342.51,
+        65026.96,
+        67598.66,
+        51917.82,
+        72796.02,
+        66227.21,
+        65855.88,
+        110375.38,
+        34070.11
+      ],
+      "Global_Target": [
+        48807.84,
+        51966.77,
+        60146.0,
+        50478.84,
+        64420.86,
+        66305.2,
+        76156.13,
+        76758.33,
+        87687.86,
+        76765.71,
+        96405.4,
+        106619.26
+      ],
+      "Global_New": [
+        8532.52,
+        18020.53,
+        33875.74,
+        28084.71,
+        29480.35,
+        32143.18,
+        23493.08,
+        32889.73,
+        27356.21,
+        31218.34,
+        36448.83,
+        12038.62
+      ],
+      "Global_Renewal": [
+        7066.66,
+        12004.26,
+        12746.81,
+        20586.35,
+        32991.88,
+        32847.0,
+        26441.59,
+        35083.07,
+        34846.3,
+        28465.91,
+        65986.99,
+        18921.56
+      ],
+      "Global_Upgrade": [
+        2247.22,
+        630.94,
+        4891.3,
+        2671.45,
+        2554.74,
+        2608.48,
+        1983.16,
+        4823.21,
+        4024.7,
+        6171.64,
+        7939.57,
+        3109.93
+      ],
+      "TH_Total": [
+        16758.56,
+        27608.16,
+        48325.73,
+        44779.99,
+        61439.0,
+        62321.27,
+        45360.91,
+        63527.74,
+        55787.96,
+        53966.64,
+        86397.94,
+        29860.97
+      ],
+      "TH_New": [
+        7549.12,
+        17849.95,
+        33204.26,
+        27617.66,
+        27726.9,
+        30218.93,
+        19738.86,
+        28292.34,
+        23595.37,
+        24983.45,
+        30426.66,
+        11850.62
+      ],
+      "TH_Renewal": [
+        7066.66,
+        9996.8,
+        12500.16,
+        15072.39,
+        31761.78,
+        30544.62,
+        24378.95,
+        31297.56,
+        29140.27,
+        24459.94,
+        52611.63,
+        15458.88
+      ],
+      "TH_Upgrade": [
+        2187.39,
+        570.12,
+        4652.73,
+        2089.93,
+        1950.32,
+        1557.71,
+        1243.11,
+        3937.84,
+        3052.33,
+        4523.25,
+        3359.65,
+        2551.47
+      ],
+      "SEA_Total": [
+        1040.61,
+        2178.54,
+        1109.8,
+        6524.86,
+        3587.96,
+        5277.39,
+        6497.69,
+        9143.73,
+        10302.7,
+        11468.8,
+        23478.3,
+        4187.14
+      ],
+      "SEA_New": [
+        983.4,
+        170.59,
+        671.48,
+        467.05,
+        1753.44,
+        1924.25,
+        3694.99,
+        4562.46,
+        3760.84,
+        5890.57,
+        6022.17,
+        188.0
+      ],
+      "SEA_Renewal": [
+        0.0,
+        2007.46,
+        246.65,
+        5513.96,
+        1230.11,
+        2302.38,
+        2062.64,
+        3725.97,
+        5584.82,
+        3944.82,
+        12908.36,
+        3462.68
+      ],
+      "SEA_Upgrade": [
+        59.83,
+        60.82,
+        238.57,
+        543.86,
+        604.41,
+        1050.77,
+        740.05,
+        855.3,
+        957.05,
+        1633.41,
+        4547.77,
+        536.46
+      ],
+      "ROW_Total": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        59.23,
+        124.54,
+        136.55,
+        420.45,
+        482.18,
+        0.0
+      ],
+      "ROW_New": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        59.23,
+        34.94,
+        0.0,
+        344.32,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "am": {
+    "uplift_multiplier": 1.1172,
+    "stickiness": {
+      "Global": {
+        "High": 330,
+        "Medium": 85,
+        "Low": 89,
+        "Inactive": 26,
+        "Churned": 7
+      },
+      "TH": {
+        "High": 296,
+        "Medium": 75,
+        "Low": 76,
+        "Inactive": 20,
+        "Churned": 7
+      },
+      "SEA": {
+        "High": 34,
+        "Medium": 10,
+        "Low": 13,
+        "Inactive": 6,
+        "Churned": 0
+      },
+      "ROW": {
+        "High": 0,
+        "Medium": 0,
+        "Low": 0,
+        "Inactive": 0,
+        "Churned": 0
+      }
+    },
+    "total_subs": {
+      "Global": 537,
+      "TH": 474,
+      "SEA": 63,
+      "ROW": 0
+    },
+    "due_cws": [
+      10,
+      11,
+      12,
+      13,
+      14
+    ],
+    "forecast": {
+      "Global_CW10": {
+        "count": 2,
+        "mh_count": 1,
+        "min_forecast": 808.0,
+        "adj_forecast": 903.0
+      },
+      "Global_CW11": {
+        "count": 32,
+        "mh_count": 25,
+        "min_forecast": 11042.0,
+        "adj_forecast": 12336.0
+      },
+      "Global_CW12": {
+        "count": 35,
+        "mh_count": 22,
+        "min_forecast": 6195.0,
+        "adj_forecast": 6921.0
+      },
+      "Global_CW13": {
+        "count": 18,
+        "mh_count": 15,
+        "min_forecast": 6098.0,
+        "adj_forecast": 6812.0
+      },
+      "Global_CW14": {
+        "count": 19,
+        "mh_count": 14,
+        "min_forecast": 4697.0,
+        "adj_forecast": 5247.0
+      },
+      "Global_month": {
+        "count": 91,
+        "mh_count": 66,
+        "min_forecast": 25181.0,
+        "adj_forecast": 28132.0
+      },
+      "TH_CW10": {
+        "count": 1,
+        "mh_count": 1,
+        "min_forecast": 808.0,
+        "adj_forecast": 903.0
+      },
+      "TH_CW11": {
+        "count": 23,
+        "mh_count": 19,
+        "min_forecast": 10530.0,
+        "adj_forecast": 11764.0
+      },
+      "TH_CW12": {
+        "count": 18,
+        "mh_count": 13,
+        "min_forecast": 3753.0,
+        "adj_forecast": 4192.0
+      },
+      "TH_CW13": {
+        "count": 11,
+        "mh_count": 9,
+        "min_forecast": 5065.0,
+        "adj_forecast": 5658.0
+      },
+      "TH_CW14": {
+        "count": 12,
+        "mh_count": 9,
+        "min_forecast": 3526.0,
+        "adj_forecast": 3939.0
+      },
+      "TH_month": {
+        "count": 57,
+        "mh_count": 45,
+        "min_forecast": 21194.0,
+        "adj_forecast": 23678.0
+      },
+      "SEA_CW10": {
+        "count": 1,
+        "mh_count": 0,
+        "min_forecast": 0.0,
+        "adj_forecast": 0.0
+      },
+      "SEA_CW11": {
+        "count": 9,
+        "mh_count": 6,
+        "min_forecast": 512.0,
+        "adj_forecast": 572.0
+      },
+      "SEA_CW12": {
+        "count": 17,
+        "mh_count": 9,
+        "min_forecast": 2442.0,
+        "adj_forecast": 2729.0
+      },
+      "SEA_CW13": {
+        "count": 7,
+        "mh_count": 6,
+        "min_forecast": 1033.0,
+        "adj_forecast": 1154.0
+      },
+      "SEA_CW14": {
+        "count": 7,
+        "mh_count": 5,
+        "min_forecast": 1170.0,
+        "adj_forecast": 1308.0
+      },
+      "SEA_month": {
+        "count": 34,
+        "mh_count": 21,
+        "min_forecast": 3987.0,
+        "adj_forecast": 4454.0
+      },
+      "ROW_CW10": {
+        "count": 0,
+        "mh_count": 0,
+        "min_forecast": 0.0,
+        "adj_forecast": 0.0
+      },
+      "ROW_CW11": {
+        "count": 0,
+        "mh_count": 0,
+        "min_forecast": 0.0,
+        "adj_forecast": 0.0
+      },
+      "ROW_CW12": {
+        "count": 0,
+        "mh_count": 0,
+        "min_forecast": 0.0,
+        "adj_forecast": 0.0
+      },
+      "ROW_CW13": {
+        "count": 0,
+        "mh_count": 0,
+        "min_forecast": 0.0,
+        "adj_forecast": 0.0
+      },
+      "ROW_CW14": {
+        "count": 0,
+        "mh_count": 0,
+        "min_forecast": 0.0,
+        "adj_forecast": 0.0
+      },
+      "ROW_month": {
+        "count": 0,
+        "mh_count": 0,
+        "min_forecast": 0.0,
+        "adj_forecast": 0.0
+      },
+      "Global_Mar'26": {
+        "count": 91,
+        "mh_count": 66,
+        "min_forecast": 25181.0,
+        "adj_forecast": 28132.0
+      },
+      "Global_Apr'26": {
+        "count": 72,
+        "mh_count": 50,
+        "min_forecast": 24194.0,
+        "adj_forecast": 27029.0
+      },
+      "Global_May'26": {
+        "count": 82,
+        "mh_count": 64,
+        "min_forecast": 36780.0,
+        "adj_forecast": 41091.0
+      },
+      "TH_Mar'26": {
+        "count": 57,
+        "mh_count": 45,
+        "min_forecast": 21194.0,
+        "adj_forecast": 23678.0
+      },
+      "TH_Apr'26": {
+        "count": 65,
+        "mh_count": 45,
+        "min_forecast": 23023.0,
+        "adj_forecast": 25722.0
+      },
+      "TH_May'26": {
+        "count": 82,
+        "mh_count": 64,
+        "min_forecast": 36780.0,
+        "adj_forecast": 41091.0
+      },
+      "SEA_Mar'26": {
+        "count": 34,
+        "mh_count": 21,
+        "min_forecast": 3987.0,
+        "adj_forecast": 4454.0
+      },
+      "SEA_Apr'26": {
+        "count": 7,
+        "mh_count": 5,
+        "min_forecast": 1170.0,
+        "adj_forecast": 1308.0
+      },
+      "SEA_May'26": {
+        "count": 0,
+        "mh_count": 0,
+        "min_forecast": 0.0,
+        "adj_forecast": 0.0
+      },
+      "ROW_Mar'26": {
+        "count": 0,
+        "mh_count": 0,
+        "min_forecast": 0.0,
+        "adj_forecast": 0.0
+      },
+      "ROW_Apr'26": {
+        "count": 0,
+        "mh_count": 0,
+        "min_forecast": 0.0,
+        "adj_forecast": 0.0
+      },
+      "ROW_May'26": {
+        "count": 0,
+        "mh_count": 0,
+        "min_forecast": 0.0,
+        "adj_forecast": 0.0
+      }
+    },
+    "anchor_cw": 9,
+    "forecast_months": [
+      "Mar'26",
+      "Apr'26",
+      "May'26"
+    ]
+  }
+};
+
+// ── utils ─────────────────────────────────────────────────────
+const $=id=>document.getElementById(id);
+const fN=n=>n==null?'–':Math.round(n).toLocaleString('en-US');
+const fK=n=>n==null?'–':Math.abs(n)>=1000?'$'+(n/1000).toLocaleString('en-US',{minimumFractionDigits:1,maximumFractionDigits:1})+'k':'$'+Math.round(n);
+const fU=n=>n==null?'–':'$'+Math.round(n).toLocaleString('en-US');
+const fX=n=>n==null?'–':n.toFixed(2)+'x';
+const fD=s=>{const d=new Date(s);return d.toLocaleString('en',{month:'short'})+' '+d.getDate();};
+const fCW=n=>n!=null?'CW'+n:'–';
+// last non-null (0 is valid)
+function lv(a){if(!a)return null;for(let i=a.length-1;i>=0;i--)if(a[i]!=null)return a[i];return null;}
+// second-to-last non-null
+function pv(a){if(!a)return null;let n=0;for(let i=a.length-1;i>=0;i--){if(a[i]!=null&&++n===2)return a[i];}return null;}
+// last non-null non-zero (spend/CAC — 0 means not yet entered)
+function lnz(a){if(!a)return null;for(let i=a.length-1;i>=0;i--)if(a[i]!=null&&a[i]!==0)return a[i];return null;}
+function wowPct(a,nz=false){const c=nz?lnz(a):lv(a),p=pv(a);return c!=null&&p!=null&&p!==0?(c-p)/Math.abs(p)*100:null;}
+function dh(p,inv=false){
+  if(p==null)return`<span class="kd fl">–</span>`;
+  const ok=inv?p<=0:p>=0;
+  return`<span class="kd ${ok?'up':'dn'}">${p>=0?'▲':'▼'} ${Math.abs(p).toFixed(1)}%</span>`;
+}
+const PR=RAW.prorate_factor;
+// Target badge: pro-rate=true → compare vs monthly_target × PR
+// Thresholds: ≥85% = green (on track), 60-84% = amber (watch), <60% = red (behind)
+function tb(actual,moTgt,proRate=false){
+  if(actual==null||moTgt==null||moTgt===0)return'';
+  const tgt=proRate?moTgt*PR:moTgt, p=actual/tgt*100;
+  const cls=p>=85?'ok':p>=60?'wn':'bd';
+  const note=proRate?`<span class="prnote">vs ${Math.round(tgt)} pro-rated (${Math.round(PR*100)}% of mo)</span>`:'';
+  return`<span class="tpct ${cls}">▸ ${Math.round(p)}%</span>${note}`;
+}
+function leg(it){return`<div class="leg">${it.map(i=>`<span class="li"><span class="ld" style="background:${i.c}"></span>${i.l}</span>`).join('')}</div>`;}
+const CM={Global:'#60a5fa',TH:'#7c6af7',SEA:'#2dd4bf',ROW:'#fbbf24'};
+
+// Country-specific array getter — NO fallback to Global for country views
+// If a country has no data for a metric, returns null-filled array
+function cGet(obj,C){
+  if(!obj)return[];
+  if(obj[C]!==undefined)return obj[C];
+  const ref=obj.Global;return ref?ref.map(()=>null):[];
+}
+// Revenue: pick correct country key. Explicit null = no data for this country/type.
+function rGet(rev,C,type){
+  const k=`${C==='Global'?'Global':C}_${type}`;
+  if(Object.prototype.hasOwnProperty.call(rev,k)){
+    // null means intentionally no data (e.g. SEA_Target)
+    return rev[k] || (rev.Global_Total||[]).map(()=>null);
+  }
+  return(rev.Global_Total||[]).map(()=>null);
+}
+// Revenue target: only Global has a weekly target; TH/SEA/ROW don't
+function hasRevTarget(C){return C==='Global';}
+
+// ── chart setup ───────────────────────────────────────────────
+const CH={};
+const GR={color:'rgba(37,42,56,.55)'};
+const TK={color:'#555e78',font:{size:9,family:"'DM Mono',monospace"}};
+const TT={backgroundColor:'#171a22',titleColor:'#e8eaf0',bodyColor:'#9aa0b4',
+  borderColor:'#252a38',borderWidth:1,padding:9,
+  titleFont:{family:"'Syne',sans-serif",size:11},bodyFont:{family:"'DM Mono',monospace",size:10}};
+const BS={responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:false},tooltip:TT},scales:{x:{grid:GR,ticks:TK},y:{grid:GR,ticks:TK}}};
+function mkL(l,d,c,f=false,dash=[]){
+  return{label:l,data:d,borderColor:c,backgroundColor:f?c+'20':'transparent',
+    pointBackgroundColor:c,pointRadius:2.5,pointHoverRadius:5,
+    borderWidth:2,fill:f,tension:.35,spanGaps:true,borderDash:dash};
+}
+function mkB(l,d,c){return{label:l,data:d,backgroundColor:c+'aa',borderColor:c,borderWidth:0,borderRadius:3,borderSkipped:false};}
+function mkC(id,type,sets,lbls,extra={}){
+  if(CH[id])CH[id].destroy();
+  const el=$(id);if(!el)return;
+  CH[id]=new Chart(el,{type,data:{labels:lbls,datasets:sets},options:{...BS,...extra}});
+}
+
+// ── state ──────────────────────────────────────────────────────
+let V='W',C='Global';
+function setView(v){V=v;$('bw').classList.toggle('on',v==='W');$('bm').classList.toggle('on',v==='M');render();}
+function setC(c){C=c;$('cbg').querySelectorAll('.cb').forEach(b=>b.classList.toggle('on',b.textContent===c));render();}
+
+// ── signals (reactive to both V and C) ───────────────────────
+function buildSigs(){
+  const d=RAW.wow,m=RAW.mom,sigs=[];
+
+  // 1. Revenue pacing — pro-rated for weekly, full-month for monthly
+  const rA_w=rGet(d.revenue,C,'Total'),rT_w=d.revenue.Global_Target;
+  const rA_m=rGet(m.revenue,C,'Total'),rT_m=m.revenue.Global_Target;
+  if(V==='W'){
+    const lA=lv(rA_w),lT=lnz(rT_w);
+    if(lA!=null&&lT!=null&&lT>0){
+      const proTgt=lT*PR,p=(lA/proTgt*100).toFixed(0),tp=+p;
+      const cls=tp>=85?'up':tp>=60?'wn':'dn';
+      sigs.push({cls,ico:tp>=85?'✓':'△',tag:`Revenue Pacing · ${C}`,
+        txt:`${C} weekly rev ${fK(lA)} vs pro-rated target ${fK(proTgt)} (${p}%). Full-mo target: ${fK(lT)}.`});
+    }
+  } else {
+    const lA=lnz(rA_m),lT=lnz(rT_m);
+    if(lA!=null&&lT!=null&&lT>0){
+      const p=(lA/lT*100).toFixed(0),tp=+p,cls=tp>=90?'up':tp>=70?'wn':'dn';
+      sigs.push({cls,ico:tp>=90?'✓':'△',tag:`Revenue vs Target · ${C}`,
+        txt:`${C} rev ${fK(lA)} vs ${fK(lT)} target (${p}% of plan).`});
+    }
+  }
+
+  // 2. Revenue mix
+  const rN=lnz(V==='W'?rGet(d.revenue,C,'New'):rGet(m.revenue,C,'New'));
+  const rR=lnz(V==='W'?rGet(d.revenue,C,'Renewal'):rGet(m.revenue,C,'Renewal'));
+  if(rN!=null&&rR!=null&&(rN+rR)>0){
+    const pN=(rN/(rN+rR)*100).toFixed(0);
+    sigs.push({cls:'nfo',ico:'◎',tag:`Revenue Mix · ${C}`,
+      txt:`New ${pN}% / Renewal ${100-+pN}% of tracked rev. ${+pN>50?'Growth-led.':'Retention-led.'}`});
+  }
+
+  // 3. Subs pacing
+  if(V==='W'){
+    const sA=cGet(d.subs,C),moT=C==='TH'?lnz(d.subs_target_monthly.TH):lnz(d.subs_target_monthly.Global);
+    const lA=lv(sA);
+    if(lA!=null&&moT!=null&&moT>0){
+      const proTgt=moT*PR,p=(lA/proTgt*100).toFixed(0),tp=+p;
+      const cls=tp>=85?'up':tp>=60?'wn':'dn';
+      sigs.push({cls,ico:cls==='up'?'✓':'△',tag:`Subs Pacing · ${C}`,
+        txt:`${C} new subs ${lA} vs pro-rated ${Math.round(proTgt)} (${p}%). Monthly target: ${Math.round(moT)}.`});
+    }
+  } else {
+    const sA=m.subs[C]||m.subs.Global,lA=lnz(sA),lT=lnz(m.subs_target.Global);
+    if(lA!=null&&lT!=null&&lT>0){
+      const p=(lA/lT*100).toFixed(0),tp=+p;
+      sigs.push({cls:tp>=90?'up':tp>=70?'wn':'dn',ico:tp>=90?'✓':'△',
+        tag:`Subs Achievement · ${C}`,txt:`${C} monthly subs ${lA} vs target ${Math.round(lT)} (${p}%).`});
+    }
+  }
+
+  // 4. CAC direction (ROW has no CAC data)
+  if(C!=='ROW'){
+    const cA=V==='W'?(d.blended_cac[C]||d.blended_cac.Global):(m.blended_cac[C]||m.blended_cac.Global);
+    const vals=(cA||[]).filter(v=>v!=null&&v>0);
+    if(vals.length>=2){
+      const lC=vals[vals.length-1],pC=vals[vals.length-2],delta=((lC-pC)/pC*100).toFixed(1);
+      sigs.push({cls:lC<=pC?'up':'dn',ico:lC<=pC?'↓':'↑',tag:`Blended CAC · ${C}`,
+        txt:`${C} CAC ${fU(lC)} (${+delta>=0?'+':''}${delta}% ${V==='W'?'WoW':'MoM'}). Lower = more efficient.`});
+    }
+  }
+
+  // 5. HQ+ trend
+  const hqSrc=(V==='W'?d.hqplus:m.hqplus);
+  const hqA=hqSrc[C]||hqSrc.Global||[];
+  const hqv=hqA.filter(v=>v!=null);
+  if(hqv.length>=6){
+    const l4=hqv.slice(-4).reduce((a,b)=>a+b,0)/4;
+    const p4a=hqv.slice(-8,-4).filter(v=>v!=null);
+    if(p4a.length>=2){
+      const p4=p4a.reduce((a,b)=>a+b,0)/p4a.length,delta=((l4-p4)/p4*100).toFixed(1);
+      sigs.push({cls:+delta>=0?'up':'dn',ico:+delta>=0?'↑':'↓',
+        tag:`HQ+ ${+delta>=0?'Up':'Declining'} · ${C}`,
+        txt:`${C} HQ+ L4 avg ${l4.toFixed(0)} — ${+delta>=0?'+':''}${delta}% vs prior 4 periods.`});
+    }
+  }
+
+  // 6. Spend pacing (weekly only, skip ROW)
+  if(V==='W'&&C!=='ROW'){
+    const spW=cGet(d.adspend,C),spMT=m.adspend_target[C]||m.adspend_target.Global;
+    const lSpW=lnz(spW),lSpT=lnz(spMT);
+    if(lSpW!=null&&lSpT!=null&&lSpT>0){
+      const proTgt=lSpT*PR,p=(lSpW/proTgt*100).toFixed(0),tp=+p;
+      const cls=tp>=70&&tp<=130?'up':tp<70?'wn':'nfo';
+      sigs.push({cls,ico:cls==='up'?'✓':'△',tag:`Spend Pacing · ${C}`,
+        txt:`Weekly spend ${fK(lSpW)} vs pro-rated ${fK(proTgt)} (${p}%). Monthly budget: ${fK(lSpT)}.`});
+    }
+  }
+
+  return sigs.slice(0,5);
+}
+function sigsHTML(){
+  return`<div class="sbar fi">${buildSigs().map(s=>`
+    <div class="sig ${s.cls}">
+      <div class="sico">${s.ico}</div>
+      <div><div class="stag">${s.tag}</div><div class="stxt">${s.txt}</div></div>
+    </div>`).join('')}</div>`;
+}
+
+// ── KPI strip ─────────────────────────────────────────────────
+function kpisHTML(){
+  const d=RAW.wow,m=RAW.mom,isG=C==='Global';
+  const revW=rGet(d.revenue,C,'Total'),revWT=d.revenue.Global_Target;
+  const subW=cGet(d.subs,C),subTmW=C==='TH'?d.subs_target_monthly.TH:d.subs_target_monthly.Global;
+  const hqW=cGet(d.hqplus,C),spW=cGet(d.adspend,C);
+  const cacW=C==='ROW'?null:d.blended_cac[C]||d.blended_cac.Global;
+  const revM=rGet(m.revenue,C,'Total'),revMT=m.revenue.Global_Target;
+  const subM=m.subs[C]||m.subs.Global,subMT=m.subs_target.Global;
+  const roasM=C==='ROW'?m.roas.Global:m.roas[C]||m.roas.Global;
+  const lRevW=lv(revW),lSubW=lv(subW),lHqW=lv(hqW),lSpW=lnz(spW),lCacW=lnz(cacW||[]);
+  const lRevWT=lnz(revWT),lRevM=lnz(revM),lRevMT=lnz(revMT),lSubM=lnz(subM),lSubMT=lnz(subMT),lRoas=lnz(roasM);
+  const kpis=[
+    {l:'Total Revenue (wk)',v:fK(lRevW),d:dh(wowPct(revW,true)),
+     s:'',
+     c:isG?[{l:`New: ${fK(lnz(d.revenue.Global_New))}`,c:'cgl'},{l:`Ren: ${fK(lnz(d.revenue.Global_Renewal))}`,c:'csea'}]:[],
+     a:'var(--grn)'},
+    {l:'New Subs (wk)',v:fN(lSubW),d:dh(wowPct(subW)),
+     s:'',
+     c:isG?[{l:`TH: ${fN(lv(d.subs.TH))}`,c:'cth'},{l:`SEA: ${fN(lv(d.subs.SEA))}`,c:'csea'}]:[],
+     a:'var(--tel)'},
+    {l:'Revenue (mo)',v:fK(lRevM),d:'',s:hasRevTarget(C)?tb(lRevM,lRevMT):'',c:[],a:'var(--grn)'},
+    {l:'New Subs (mo)',v:fN(lSubM),d:'',s:lSubMT?tb(lSubM,lSubMT):'',c:[],a:'var(--tel)'},
+    {l:'HQ+ (wk)',v:fN(lHqW),d:dh(wowPct(hqW)),s:'',
+     c:isG?[{l:`TH: ${fN(lv(d.hqplus.TH))}`,c:'cth'},{l:`SEA: ${fN(lv(d.hqplus.SEA))}`,c:'csea'}]:[],
+     a:'var(--acc)'},
+    {l:'Blended CAC (wk)',v:C==='ROW'?'–':fU(lCacW),d:C==='ROW'?'':dh(wowPct(cacW||[],true),true),s:'',
+     c:isG?[{l:`TH: ${fU(lnz(d.blended_cac.TH))}`,c:'cth'}]:[],a:'var(--amb)'},
+    {l:'Ad Spend (wk)',v:fK(lSpW),d:dh(wowPct(spW,true),true),s:'',c:[],a:'var(--blu)'},
+    {l:'ROAS',v:fX(lRoas),
+     d:`<span class="kd ${lRoas&&lRoas>=1?'up':'dn'}" style="font-size:9px">${lRoas&&lRoas>=1?'▲ Above':'▼ Below'} 1x</span>`,
+     s:'',c:[],a:lRoas&&lRoas>=1?'var(--grn)':'var(--red)'},
+  ];
+  return`<div class="krow fi">${kpis.map(k=>`
+    <div class="kpi" style="--ka:${k.a}">
+      <div class="klbl">${k.l}</div><div class="kval">${k.v}</div>
+      ${k.d}${k.s}
+      ${k.c.length?`<div class="chips">${k.c.map(ch=>`<span class="chip ${ch.c}">${ch.l}</span>`).join('')}</div>`:''}
+    </div>`).join('')}</div>`;
+}
+
+// ── WEEKLY ────────────────────────────────────────────────────
+function buildW(){
+  const d=RAW.wow,isG=C==='Global',col=CM[C]||'#60a5fa';
+  const cwL=d.cw.map(fCW),li=d.cw.length-1;
+  const rTot=rGet(d.revenue,C,'Total'),rNew=rGet(d.revenue,C,'New');
+  const rRen=rGet(d.revenue,C,'Renewal'),rUpg=rGet(d.revenue,C,'Upgrade');
+  const rTgt=d.revenue.Global_Target;
+  const rows=[
+    {n:'Global',c:'#60a5fa',hq:d.hqplus.Global[li],hqp:d.hqplus.Global[li-1],sp:d.adspend.Global[li],spp:d.adspend.Global[li-1],sub:d.subs.Global[li],subT:lnz(d.subs_target_monthly.Global),rev:d.revenue.Global_Total[li]},
+    {n:'TH',    c:'#7c6af7',hq:d.hqplus.TH[li],    hqp:d.hqplus.TH[li-1],    sp:d.adspend.TH[li],   spp:d.adspend.TH[li-1],   sub:d.subs.TH[li],    subT:lnz(d.subs_target_monthly.TH),    rev:d.revenue.TH_Total[li]},
+    {n:'SEA',   c:'#2dd4bf',hq:d.hqplus.SEA[li],   hqp:d.hqplus.SEA[li-1],   sp:d.adspend.SEA[li],  spp:d.adspend.SEA[li-1],  sub:d.subs.SEA[li],   subT:null,                              rev:d.revenue.SEA_Total[li]},
+    {n:'ROW',   c:'#fbbf24',hq:d.hqplus.ROW[li],   hqp:d.hqplus.ROW[li-1],   sp:d.adspend.ROW[li],  spp:d.adspend.ROW[li-1],  sub:d.subs.ROW[li],   subT:null,                              rev:d.revenue.ROW_Total[li]},
+  ];
+  const tbl=`<table class="ctab">
+    <thead><tr><th>Region</th><th>Revenue</th><th>Subs</th><th>HQ+</th><th>Spend</th></tr></thead>
+    <tbody>${rows.map(r=>{
+      const dhq=r.hqp!=null&&r.hqp!==0?((r.hq-r.hqp)/Math.abs(r.hqp)*100):null;
+      const proT=r.subT!=null?r.subT*PR:null,sp=proT&&r.sub!=null?r.sub/proT*100:null;
+      const sc=sp==null?'fl':sp>=85?'up':sp>=60?'fl':'dn';
+      return`<tr>
+        <td><span class="cname"><span class="cdot" style="background:${r.c}"></span>${r.n}</span></td>
+        <td>${r.rev!=null?fK(r.rev):'–'}</td>
+        <td><b>${r.sub!=null?r.sub:'–'}</b></td>
+
+        <td>${r.hq!=null?r.hq:'–'}${dhq!=null?` <span class="dtag ${dhq>=0?'up':'dn'}">${dhq>=0?'▲':'▼'}${Math.abs(dhq).toFixed(1)}%</span>`:''}</td>
+        <td>${r.sp!=null?fK(r.sp):'–'}</td>
+      </tr>`;
+    }).join('')}</tbody></table>
+`;
+
+  const revStack=`<div class="rstack">
+    <div class="ri"><div class="rilbl">Total</div><div class="rival" style="color:var(--grn)">${fK(rTot[li])}</div></div>
+    ${rNew[li]!=null?`<div class="ri"><div class="rilbl">New</div><div class="rival" style="color:var(--blu)">${fK(rNew[li])}</div></div>`:''}
+    ${rRen[li]!=null&&rRen[li]!==0?`<div class="ri"><div class="rilbl">Renewal</div><div class="rival" style="color:var(--tel)">${fK(rRen[li])}</div></div>`:''}
+    ${rUpg[li]!=null&&rUpg[li]!==0?`<div class="ri"><div class="rilbl">Upgrade</div><div class="rival" style="color:var(--acc)">${fK(rUpg[li])}</div></div>`:''}
+  </div>`;
+
+  $('app').innerHTML=kpisHTML()+sigsHTML()+`<div class="fi">
+  <div class="sec"><span class="slbl">① Revenue & Subscriptions</span><span class="sln"></span></div>
+  <div class="grid g21">
+    <div class="card">
+      <div class="ctit">Weekly Revenue — ${isG?'Global':C}</div>
+      <div class="csub">Total · New · Renewal · Upgrade breakdown</div>
+      ${leg([{l:'Total',c:'var(--grn)'},{l:'New',c:'var(--blu)'},{l:'Renewal',c:'var(--tel)'},{l:'Upgrade',c:'var(--acc)'}])}
+      <div class="cbox h210"><canvas id="cw-rev"></canvas></div>
+      ${revStack}
+    </div>
+    <div class="card">
+      <div class="ctit">Breakdown · ${fCW(RAW.anchor_cw)} · w/c ${fD(d.dates[li])}</div>
+      <div class="csub">All four regions — latest week data</div>
+      ${tbl}
+    </div>
+  </div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="ctit">New Subscriptions · ${isG?'Global':C}</div>
+      <div class="csub">Weekly new subscribers by country</div>
+      ${isG?leg([{l:'TH',c:'var(--th)'},{l:'SEA',c:'var(--sea)'}]):leg([{l:C,c:col}])}
+      <div class="cbox h170"><canvas id="cw-subs"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ctit">Revenue Mix · ${isG?'Global':C}</div>
+      <div class="csub">New · Renewal · Upgrade stacked bars</div>
+      ${leg([{l:'New',c:'var(--blu)'},{l:'Renewal',c:'var(--tel)'},{l:'Upgrade',c:'var(--acc)'}])}
+      <div class="cbox h170"><canvas id="cw-mix"></canvas></div>
+    </div>
+  </div>
+  <div class="sec"><span class="slbl">② Marketing</span><span class="sln"></span></div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="ctit">HQ+ Sign-ups · ${isG?'Global · TH · SEA':C}</div>
+      <div class="csub">Qualified: saved conv &gt;50 or LINE Friends &gt;50</div>
+      ${isG?leg([{l:'Global',c:'var(--gl)'},{l:'TH',c:'var(--th)'},{l:'SEA',c:'var(--sea)'}]):leg([{l:C,c:col}])}
+      <div class="cbox h170"><canvas id="cw-hq"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ctit">Ad Spend · ${isG?'TH · SEA · ROW':C}</div>
+      <div class="csub">Weekly USD</div>
+      ${isG?leg([{l:'TH',c:'var(--th)'},{l:'SEA',c:'var(--sea)'},{l:'ROW',c:'var(--row)'}]):leg([{l:C,c:col}])}
+      <div class="cbox h170"><canvas id="cw-spend"></canvas></div>
+    </div>
+  </div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="ctit">Blended CAC · ${C==='ROW'?'N/A for ROW':isG?'Global · TH':C}</div>
+      <div class="csub">Cost per new subscriber (blended)</div>
+      ${C==='ROW'?leg([{l:'No CAC data available for ROW',c:'var(--t3)'}]):
+        isG?leg([{l:'Global',c:'var(--gl)'},{l:'TH',c:'var(--th)'}]):leg([{l:C,c:col}])}
+      <div class="cbox h170"><canvas id="cw-cac"></canvas></div>
+    </div>
+  </div>
+  <div class="sec"><span class="slbl">③ Account Management</span><span class="sln"></span></div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="ctit">Active Subscriber Base · <span id="sticky-region"></span></div>
+      <div class="csub">Stickiness = renewal commitment depth</div>
+      <div id="sticky-body"></div>
+    </div>
+    <div class="card">
+      <div class="ctit">Renewal Forecast · <span id="fc-period"></span></div>
+      <div class="csub" id="fc-sub"></div>
+      <div id="forecast-body"></div>
+    </div>
+  </div>
+  </div>`;
+
+  requestAnimationFrame(()=>{
+    // Revenue
+    mkC('cw-rev','line',[
+      mkL('Total',rTot,'#34d399',true),mkL('New',rNew,'#60a5fa'),
+      mkL('Renewal',rRen,'#2dd4bf'),mkL('Upgrade',rUpg,'#7c6af7'),
+
+    ],cwL,{plugins:{...BS.plugins,tooltip:{...TT,callbacks:{label:c=>'$'+Math.round(c.parsed.y).toLocaleString()}}}});
+
+    // Subs + pro-rated target
+    const moT=C==='TH'?lnz(d.subs_target_monthly.TH):C==='Global'?lnz(d.subs_target_monthly.Global):null; // SEA/ROW have no weekly subs target
+    if(isG){
+      mkC('cw-subs','bar',[
+        mkB('TH',d.subs.TH,'#7c6af7'),mkB('SEA',d.subs.SEA,'#2dd4bf'),
+      ],cwL,{scales:{x:{stacked:true,grid:GR,ticks:TK},y:{stacked:true,grid:GR,ticks:TK}}});
+    } else {
+      mkC('cw-subs','bar',[mkB(C,cGet(d.subs,C),col)],cwL);
+    }
+
+    // Rev mix
+    mkC('cw-mix','bar',[
+      mkB('Upgrade',rUpg,'#7c6af7'),mkB('Renewal',rRen,'#2dd4bf'),mkB('New',rNew,'#60a5fa'),
+    ],cwL,{scales:{x:{stacked:true,grid:GR,ticks:TK},y:{stacked:true,grid:GR,ticks:{...TK,callback:v=>'$'+Math.round(v/1000)+'k'}}}});
+
+    // HQ+
+    if(isG){
+      mkC('cw-hq','line',[
+        mkL('G',d.hqplus.Global,'#60a5fa',true),mkL('TH',d.hqplus.TH,'#7c6af7'),mkL('SEA',d.hqplus.SEA,'#2dd4bf'),
+      ],cwL);
+    } else {mkC('cw-hq','line',[mkL(C,cGet(d.hqplus,C),col,true)],cwL);}
+
+    // Spend
+    if(isG){
+      mkC('cw-spend','bar',[
+        mkB('TH',d.adspend.TH,'#7c6af7'),mkB('SEA',d.adspend.SEA,'#2dd4bf'),mkB('ROW',d.adspend.ROW,'#fbbf24'),
+      ],cwL,{scales:{x:{stacked:true,grid:GR,ticks:TK},y:{stacked:true,grid:GR,ticks:{...TK,callback:v=>'$'+Math.round(v/1000)+'k'}}}});
+    } else {
+      mkC('cw-spend','bar',[mkB(C,cGet(d.adspend,C),col)],cwL,
+        {scales:{x:{grid:GR,ticks:TK},y:{grid:GR,ticks:{...TK,callback:v=>'$'+Math.round(v/1000)+'k'}}}});
+    }
+
+    // CAC
+    if(C==='ROW'){mkC('cw-cac','line',[],cwL);}
+    else if(isG){mkC('cw-cac','line',[mkL('G',d.blended_cac.Global,'#60a5fa'),mkL('TH',d.blended_cac.TH,'#7c6af7')],cwL);}
+    else{mkC('cw-cac','line',[mkL(C,d.blended_cac[C]||d.blended_cac.Global,col)],cwL);}
+
+
+    renderAM();
+  });
+}
+
+// ── MONTHLY ───────────────────────────────────────────────────
+function buildM(){
+  const m=RAW.mom,isG=C==='Global',col=CM[C]||'#60a5fa',lbls=m.months;
+  const revA=rGet(m.revenue,C,'Total'),revT=m.revenue.Global_Target;
+  const revNew=rGet(m.revenue,C,'New'),revRen=rGet(m.revenue,C,'Renewal'),revUpg=rGet(m.revenue,C,'Upgrade');
+  // Strict country getters — never fall back to Global for ROW
+  const isROW=C==='ROW';
+  const subA=m.subs[C]!==undefined?m.subs[C]:m.subs.Global;
+  const subT=isROW?null:(m.subs_target[C]!==undefined&&m.subs_target[C]!==null?m.subs_target[C]:C==='Global'?m.subs_target.Global:null);
+  const spA=m.adspend[C]!==undefined?m.adspend[C]:m.adspend.Global;
+  const spT=isROW?null:(m.adspend_target[C]||m.adspend_target.Global);
+  const cacA=isROW?null:(m.blended_cac[C]!==undefined?m.blended_cac[C]:m.blended_cac.Global),cacT=m.cac_target.Global;
+  const hqA=m.hqplus[C]!==undefined?m.hqplus[C]:null; // null for ROW — no HQ+ data
+  const roasA=isROW?null:(m.roas[C]||m.roas.Global);
+  const cacAvg=cacA?(cacA.filter(v=>v!=null&&v>0).reduce((s,v,_,a)=>s+v/a.length,0)):0;
+
+  $('app').innerHTML=kpisHTML()+sigsHTML()+`<div class="fi">
+  <div class="sec"><span class="slbl">① Revenue & Subscriptions</span><span class="sln"></span></div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="ctit">Monthly Revenue vs Target · ${isG?'Global':C}</div>
+      <div class="csub">Bars = actual · dashed = target</div>
+      ${leg([{l:'Actual',c:col},...(hasRevTarget(C)?[{l:'Target',c:'#555e78'}]:[])])}
+      <div class="cbox h190"><canvas id="cm-rev"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ctit">Revenue Mix · ${isG?'Global':C}</div>
+      <div class="csub">New · Renewal · Upgrade stacked</div>
+      ${leg([{l:'New',c:'var(--blu)'},{l:'Renewal',c:'var(--tel)'},{l:'Upgrade',c:'var(--acc)'}])}
+      <div class="cbox h190"><canvas id="cm-mix"></canvas></div>
+    </div>
+  </div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="ctit">New Subscriptions vs Target · ${isG?'Global':C}</div>
+      <div class="csub">Bars = actual · dashed = target</div>
+      ${leg([{l:'Actual',c:'var(--tel)'},...(subT?[{l:'Target',c:'#555e78'}]:[])])}
+      <div class="cbox h170"><canvas id="cm-subs"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ctit">HQ+ Sign-ups · ${isG?'Global · TH':C}</div>
+      <div class="csub">Monthly qualified sign-ups</div>
+      ${isG?leg([{l:'Global',c:'var(--gl)'},{l:'TH',c:'var(--th)'}]):leg([{l:C,c:col}])}
+      <div class="cbox h170"><canvas id="cm-hq"></canvas></div>
+    </div>
+  </div>
+  <div class="sec"><span class="slbl">② Marketing</span><span class="sln"></span></div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="ctit">Ad Spend vs Budget · ${isG?'Global':C}</div>
+      <div class="csub">Bars = actual · dashed = budget</div>
+      ${leg([{l:'Actual',c:'var(--blu)'},{l:'Budget',c:'#555e78'}])}
+      <div class="cbox h170"><canvas id="cm-spend"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ctit">Blended CAC vs Target · ${C==='ROW'?'N/A':isG?'Global':C}</div>
+      <div class="csub">Lower is better · dashed = target · dotted = 2025 avg</div>
+      ${C==='ROW'?leg([{l:'No CAC data for ROW',c:'var(--t3)'}]):
+        leg([{l:'CAC',c:'var(--amb)'},{l:'Target',c:'#555e78'},{l:'Avg',c:'var(--pnk)'}])}
+      <div class="cbox h170"><canvas id="cm-cac"></canvas></div>
+    </div>
+  </div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="ctit">ROAS · 1x Breakeven · ${isG?'Global':C}</div>
+      <div class="csub">Blended return on ad spend</div>
+      ${leg([{l:'ROAS',c:'var(--gl)'},{l:'1x',c:'var(--red)'}])}
+      <div class="cbox h150"><canvas id="cm-roas"></canvas></div>
+    </div>
+  </div>
+  <div class="sec"><span class="slbl">③ Account Management</span><span class="sln"></span></div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="ctit">Active Subscriber Base · <span id="sticky-region"></span></div>
+      <div class="csub">Stickiness = renewal commitment depth</div>
+      <div id="sticky-body"></div>
+    </div>
+    <div class="card">
+      <div class="ctit">Renewal Forecast · <span id="fc-period"></span></div>
+      <div class="csub" id="fc-sub"></div>
+      <div id="forecast-body"></div>
+    </div>
+  </div>
+  </div>`;
+
+  requestAnimationFrame(()=>{
+    mkC('cm-rev','bar',[
+      mkB('Rev',revA,col),...(hasRevTarget(C)?[{...mkL('Tgt',revT,'#555e78',false,[6,4]),type:'line',pointRadius:0}]:[]),
+    ],lbls,{plugins:{...BS.plugins,tooltip:{...TT,callbacks:{label:c=>'$'+Math.round(c.parsed.y).toLocaleString()}}}});
+
+    mkC('cm-mix','bar',[
+      mkB('Upgrade',revUpg,'#7c6af7'),mkB('Renewal',revRen,'#2dd4bf'),mkB('New',revNew,'#60a5fa'),
+    ],lbls,{scales:{x:{stacked:true,grid:GR,ticks:TK},y:{stacked:true,grid:GR,ticks:{...TK,callback:v=>'$'+Math.round(v/1000)+'k'}}}});
+
+    mkC('cm-subs','bar',[
+      mkB('Subs',subA,'#2dd4bf'),...(subT?[{...mkL('Tgt',subT,'#555e78',false,[6,4]),type:'line',pointRadius:0}]:[]),
+    ],lbls);
+
+    if(isG){mkC('cm-hq','bar',[mkB('G',m.hqplus.Global,'#60a5fa'),mkB('TH',m.hqplus.TH,'#7c6af7')],lbls);}
+    else{mkC('cm-hq','bar',[mkB(C,hqA,col)],lbls);}
+
+    mkC('cm-spend','bar',[
+      mkB('Sp',spA,'#60a5fa'),...(spT?[{...mkL('Budget',spT,'#555e78',false,[6,4]),type:'line',pointRadius:0}]:[]),
+    ],lbls,{plugins:{...BS.plugins,tooltip:{...TT,callbacks:{label:c=>'$'+Math.round(c.parsed.y).toLocaleString()}}}});
+
+    if(C==='ROW'){mkC('cm-cac','line',[],lbls);}
+    else{
+      mkC('cm-cac','bar',[
+        mkB('CAC',cacA,'#fbbf24'),{...mkL('Tgt',cacT,'#555e78',false,[6,4]),type:'line',pointRadius:0},
+        {...mkL('Avg',lbls.map(()=>cacAvg>0?cacAvg:null),'#f472b6',false,[3,3]),type:'line',pointRadius:0},
+      ],lbls);
+    }
+
+    mkC('cm-roas','line',[
+      ...(roasA?[mkL('ROAS',roasA,'#60a5fa',true)]:[]),
+      {...mkL('1x',lbls.map(()=>1),'#f87171',false,[4,3]),pointRadius:0},
+    ],lbls,{plugins:{...BS.plugins,tooltip:{...TT,callbacks:{label:c=>c.parsed.y.toFixed(2)+'x'}}}});
+    renderAM();
+  });
+}
+
+
+// ── ACCOUNT MANAGEMENT ─────────────────────────────────────
+// Stickiness definition (from Stickiness Score tab):
+//   Inactive = 0% capture rate
+//   Low      = <29% capture rate
+//   Medium   = 29–99% capture rate
+//   High     = 100% capture rate
+// Active = Medium + High
+
+const SC = {High:'#34d399',Medium:'#60a5fa',Low:'#fbbf24',Inactive:'#f87171',Churned:'#555e78'};
+
+function renderAM(){
+  const am = RAW.am;
+  const reg = C==='Global'?'Global':C==='TH'?'TH':C==='SEA'?'SEA':'ROW';
+  const sc  = am.stickiness[reg] || {};
+  const total = am.total_subs[reg] || 0;
+  const active = (sc.High||0)+(sc.Medium||0);
+  const activePct = total>0?Math.round(active/total*100):0;
+  const uplift = am.uplift_multiplier;
+
+  // ── Card 1: Stickiness ──
+  const order = ['High','Medium','Low','Inactive','Churned'];
+  const barSegs = order.filter(k=>(sc[k]||0)>0).map(k=>{
+    const pct = total>0?((sc[k]||0)/total*100):0;
+    return `<div style="width:${pct.toFixed(1)}%;background:${SC[k]};height:100%;min-width:2px" title="${k}: ${sc[k]||0}"></div>`;
+  }).join('');
+
+  const chips = order.filter(k=>(sc[k]||0)>0).map(k=>`
+    <div style="display:flex;flex-direction:column;background:var(--sur2);border-radius:7px;padding:8px 11px;flex:1;min-width:65px;border-left:3px solid ${SC[k]}">
+      <span style="font-size:8px;font-family:var(--mono);color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">${k}</span>
+      <span style="font-size:20px;font-weight:700;font-family:var(--head);color:${SC[k]}">${sc[k]||0}</span>
+      <span style="font-size:9px;font-family:var(--mono);color:var(--t2)">${total>0?Math.round((sc[k]||0)/total*100):0}%</span>
+    </div>`).join('');
+
+  $('sticky-region').textContent = reg==='Global'?'All Regions':reg;
+  $('sticky-body').innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <span style="font-size:32px;font-weight:800;font-family:var(--head)">${total}</span>
+      <div>
+        <div style="font-size:11px;color:var(--t2)">active subscribers</div>
+        <div style="font-size:10px;font-family:var(--mono);color:var(--grn)">${active} active (${activePct}%) · Medium + High stickiness</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:2px;height:8px;border-radius:4px;overflow:hidden;margin-bottom:12px;background:var(--bdr)">${barSegs}</div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap">${chips}</div>
+    <div style="margin-top:10px;padding:8px 10px;background:var(--sur2);border-radius:6px;font-size:9.5px;color:var(--t3);font-family:var(--mono);line-height:1.7">
+      <span style="color:var(--grn)">High</span> 100% msg capture rate &nbsp;·&nbsp;
+      <span style="color:var(--blu)">Medium</span> 29–99% &nbsp;·&nbsp;
+      <span style="color:var(--amb)">Low</span> &lt;29% &nbsp;·&nbsp;
+      <span style="color:var(--red)">Inactive</span> 0%
+    </div>`;
+
+  // ── Card 2: Renewal Forecast ──
+  const isW = V==='W';
+  const dueCWs = am.due_cws; // [10,11,12,13,14]
+  $('fc-period').textContent = isW ? `CW${dueCWs[0]}–CW${dueCWs[dueCWs.length-1]}` : 'March 2026';
+  $('fc-sub').textContent = `Min = Medium+High renew at last billing price · Adj = +${((uplift-1)*100).toFixed(1)}% historical upgrade uplift`;
+
+  if(isW){
+    const rows = dueCWs.map(cw=>{
+      const d = am.forecast[`${reg}_CW${cw}`]||{};
+      if(!d.count) return '';
+      return `<tr>
+        <td><span style="font-family:var(--mono);font-weight:600;color:var(--acc)">CW${cw}</span></td>
+        <td style="text-align:right;font-family:var(--mono)">${d.count}</td>
+        <td style="text-align:right;font-family:var(--mono);color:var(--grn)">${d.mh_count}</td>
+        <td style="text-align:right;font-family:var(--mono);color:var(--grn)">$${fN(d.min_forecast)}</td>
+        <td style="text-align:right;font-family:var(--mono);color:var(--blu)">$${fN(d.adj_forecast)}</td>
+      </tr>`;
+    }).join('');
+    const totMin = dueCWs.reduce((s,cw)=>s+(am.forecast[`${reg}_CW${cw}`]?.min_forecast||0),0);
+    const totAdj = dueCWs.reduce((s,cw)=>s+(am.forecast[`${reg}_CW${cw}`]?.adj_forecast||0),0);
+    const totCt  = dueCWs.reduce((s,cw)=>s+(am.forecast[`${reg}_CW${cw}`]?.count||0),0);
+    const totMH  = dueCWs.reduce((s,cw)=>s+(am.forecast[`${reg}_CW${cw}`]?.mh_count||0),0);
+
+    $('forecast-body').innerHTML = `
+      <table class="ctab" style="margin-bottom:10px">
+        <thead><tr>
+          <th>Week</th><th style="text-align:right">Due</th>
+          <th style="text-align:right">Active</th>
+          <th style="text-align:right">Min Forecast</th>
+          <th style="text-align:right">Adj Forecast</th>
+        </tr></thead>
+        <tbody>
+          ${rows||'<tr><td colspan="5" style="color:var(--t3);text-align:center;padding:12px">No renewals due</td></tr>'}
+          <tr style="border-top:1px solid var(--bdr2)">
+            <td style="font-weight:700">Total</td>
+            <td style="text-align:right;font-family:var(--mono);font-weight:600">${totCt}</td>
+            <td style="text-align:right;font-family:var(--mono);font-weight:600;color:var(--grn)">${totMH}</td>
+            <td style="text-align:right;font-family:var(--mono);font-weight:700;color:var(--grn)">$${fN(totMin)}</td>
+            <td style="text-align:right;font-family:var(--mono);font-weight:700;color:var(--blu)">$${fN(totAdj)}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="display:flex;gap:6px">
+        <div style="flex:1;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.2);border-radius:7px;padding:9px 11px">
+          <div style="font-size:8px;font-family:var(--mono);color:var(--grn);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Min Forecast</div>
+          <div style="font-size:20px;font-weight:700;font-family:var(--head);color:var(--grn)">$${fN(totMin)}</div>
+          <div style="font-size:9px;color:var(--t3);margin-top:2px">${totMH} active × last billing</div>
+        </div>
+        <div style="flex:1;background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.2);border-radius:7px;padding:9px 11px">
+          <div style="font-size:8px;font-family:var(--mono);color:var(--blu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Adj Forecast</div>
+          <div style="font-size:20px;font-weight:700;font-family:var(--head);color:var(--blu)">$${fN(totAdj)}</div>
+          <div style="font-size:9px;color:var(--t3);margin-top:2px">+${((uplift-1)*100).toFixed(1)}% upgrade uplift</div>
+        </div>
+      </div>`;
+  } else {
+    // Monthly view: show Mar / Apr / May forecast
+    const months = am.forecast_months; // ["Mar'26","Apr'26","May'26"]
+    $('fc-period').textContent = `${months[0]} – ${months[months.length-1]}`;
+    $('fc-sub').textContent = `Current month + 2-month ahead · Min = active subs × last billing · Adj = +${((uplift-1)*100).toFixed(1)}% upgrade uplift`;
+
+    const moRows = months.map((mo,idx)=>{
+      const d = am.forecast[`${reg}_${mo}`]||{};
+      const isCurrentMo = idx===0;
+      return `<tr ${isCurrentMo?'style="background:rgba(96,165,250,.05)"':''}>
+        <td><span style="font-family:var(--mono);font-weight:${isCurrentMo?700:400};color:${isCurrentMo?'var(--blu)':'var(--t2)'}">${mo}${isCurrentMo?' <span style=\'font-size:8px;color:var(--t3)\'>current</span>':''}</span></td>
+        <td style="text-align:right;font-family:var(--mono)">${d.count||0}</td>
+        <td style="text-align:right;font-family:var(--mono);color:var(--grn)">${d.mh_count||0}</td>
+        <td style="text-align:right;font-family:var(--mono);color:var(--grn)">$${fN(d.min_forecast||0)}</td>
+        <td style="text-align:right;font-family:var(--mono);color:var(--blu)">$${fN(d.adj_forecast||0)}</td>
+      </tr>`;
+    }).join('');
+
+    // Summary cards for each month
+    const summaryCards = months.map((mo,idx)=>{
+      const d = am.forecast[`${reg}_${mo}`]||{};
+      const isNow = idx===0;
+      return `
+        <div style="flex:1;background:${isNow?'rgba(96,165,250,.08)':'var(--sur2)'};border:1px solid ${isNow?'rgba(96,165,250,.25)':'var(--bdr)'};border-radius:8px;padding:10px 12px">
+          <div style="font-size:8px;font-family:var(--mono);color:${isNow?'var(--blu)':'var(--t3)'};text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">${mo}${isNow?' · now':''}</div>
+          <div style="margin-bottom:4px">
+            <div style="font-size:9px;color:var(--t3);font-family:var(--mono)">Min</div>
+            <div style="font-size:18px;font-weight:700;font-family:var(--head);color:var(--grn)">$${fN(d.min_forecast||0)}</div>
+          </div>
+          <div>
+            <div style="font-size:9px;color:var(--t3);font-family:var(--mono)">Adjusted</div>
+            <div style="font-size:18px;font-weight:700;font-family:var(--head);color:var(--blu)">$${fN(d.adj_forecast||0)}</div>
+          </div>
+          <div style="margin-top:6px;font-size:9px;color:var(--t3);font-family:var(--mono)">${d.mh_count||0} active / ${d.count||0} due</div>
+        </div>`;
+    }).join('');
+
+    $('forecast-body').innerHTML = `
+      <div style="display:flex;gap:6px;margin-bottom:12px">${summaryCards}</div>
+      <table class="ctab">
+        <thead><tr>
+          <th>Month</th>
+          <th style="text-align:right">Due</th>
+          <th style="text-align:right">Active</th>
+          <th style="text-align:right">Min Forecast</th>
+          <th style="text-align:right">Adj Forecast</th>
+        </tr></thead>
+        <tbody>${moRows}</tbody>
+      </table>
+      <div style="margin-top:8px;font-size:9px;color:var(--t3);font-family:var(--mono)">
+        Active = Medium + High stickiness · Adj applies ×${uplift.toFixed(3)} historical upgrade uplift
+      </div>`;
+  }
+}
+
+// ── init ──────────────────────────────────────────────────────
+function render(){if(V==='W')buildW();else buildM();}
+$('dbadge').textContent=`● ${fCW(RAW.anchor_cw)} · w/c ${fD(RAW.anchor_date)} · last complete week`;
+render();
+</script>
+</body>
+</html>
